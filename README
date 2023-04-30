@@ -1,0 +1,124 @@
+
+Description
+IconImageSource on TabbedPage Causes Crash on iOS
+Summary
+
+    When setting the IconImageSource attribute on a ContentPage nested inside a TabbedPage declaration, the iOS application fails to load. However, this behavior is not observed on an Android simulator.
+
+Development Device: MacBook Air M1
+Installed dotnet Version: net7.0
+Dotnet Workloads
+
+    Installed Workload Id Manifest Version Installation Source
+
+    wasm-tools 7.0.5/7.0.100 SDK 7.0.200
+    macos 13.1.2054/7.0.100 SDK 7.0.200
+    maui-maccatalyst 7.0.81/7.0.100 SDK 7.0.200
+    maui-ios 7.0.81/7.0.100 SDK 7.0.200
+    maui-android 7.0.81/7.0.100 SDK 7.0.200
+    maui 7.0.81/7.0.100 SDK 7.0.200
+    tvos 16.1.2551/7.0.100 SDK 7.0.200
+
+Steps to Reproduce
+
+    Create MAUI Blazor Project
+    Add an image (Example Type: SVG) to Resources/Images
+    Modify MainPage to have a TabbedPage declaration, with ContentPage(s) as it's child node(s)
+    Add the IconImageSource attribute to the ContentPage declarations, and set their path to the images stored in Resource/Images
+    Debug the project with an Android Simulator, observe the tabbed icon's presence
+    Debug the project with an iOS Simulator, project builds but fails to run
+    a. iOS simulator 16.2 starts to load the app, a black screen is presented, application crashes
+    b. Installing on an iPhone 13 16.1, app starts to load, a black screen is presented, application crashes
+
+Link to public reproduction project repository
+
+https://github.com/Bibikski/maui-bugreport-iconimagesource-ios-7
+Version with bug
+
+7.0 (current)
+Last version that worked well
+
+Unknown/Other
+Affected platforms
+
+iOS
+Affected platform versions
+
+iOS 16.x
+Did you find any workaround?
+
+No work around discovered.
+Relevant log output
+
+Unhandled Exception:
+System.InvalidOperationException: Unable to load image file.
+   at Microsoft.Maui.FileImageSourceService.GetImageAsync(IFileImageSource imageSource, Single scale, CancellationToken cancellationToken)
+   at Microsoft.Maui.FileImageSourceService.GetImageAsync(IImageSource imageSource, Single scale, CancellationToken cancellationToken)
+   at Microsoft.Maui.ImageSourceExtensions.GetPlatformImageAsync(IImageSourceService imageSourceService, IImageSource imageSource, IMauiContext mauiContext)
+   at Microsoft.Maui.ImageSourceExtensions.GetPlatformImageAsync(IImageSource imageSource, IMauiContext mauiContext)
+   at Microsoft.Maui.ImageSourceExtensions.LoadImage(IImageSource source, IMauiContext mauiContext, Action`1 finished)
+   at Microsoft.Maui.Controls.Handlers.Compatibility.TabbedRenderer.GetIcon(Page page)
+   at Microsoft.Maui.Controls.Handlers.Compatibility.TabbedRenderer.SetTabBarItem(IPlatformViewHandler renderer)
+   at ObjCRuntime.Runtime.ThrowException(IntPtr gchandle)
+   at UIKit.UIApplication.UIApplicationMain(Int32 argc, String[] argv, IntPtr principalClassName, IntPtr delegateClassName)
+   at UIKit.UIApplication.Main(String[] args, Type principalClass, Type delegateClass)
+   at <REDACTED>.Program.Main(String[] args) in <REDACTED>/src/Platforms/iOS/Program.cs:line 13
+2023-04-29 20:34:00.544445-0400 <REDACTED_PROJECT_NAME>[44129:1960946] Unhandled managed exception: Unable to load image file. (System.InvalidOperationException)
+   at Microsoft.Maui.FileImageSourceService.GetImageAsync(IFileImageSource imageSource, Single scale, CancellationToken cancellationToken)
+   at Microsoft.Maui.FileImageSourceService.GetImageAsync(IImageSource imageSource, Single scale, CancellationToken cancellationToken)
+   at Microsoft.Maui.ImageSourceExtensions.GetPlatformImageAsync(IImageSourceService imageSourceService, IImageSource imageSource, IMauiContext mauiContext)
+   at Microsoft.Maui.ImageSourceExtensions.GetPlatformImageAsync(IImageSource imageSource, IMauiContext mauiContext)
+   at Microsoft.Maui.ImageSourceExtensions.LoadImage(IImageSource source, IMauiContext mauiContext, Action`1 finished)
+   at Microsoft.Maui.Controls.Handlers.Compatibility.TabbedRenderer.GetIcon(Page page)
+   at Microsoft.Maui.Controls.Handlers.Compatibility.TabbedRenderer.SetTabBarItem(IPlatformViewHandler renderer)
+   at ObjCRuntime.Runtime.ThrowException(IntPtr gchandle)
+   at UIKit.UIApplication.UIApplicationMain(Int32 argc, String[] argv, IntPtr principalClassName, IntPtr delegateClassName)
+   at UIKit.UIApplication.Main(String[] args, Type principalClass, Type delegateClass)
+   at <REDACTED>.Program.Main(String[] args) in <REDACTED>/src/Platforms/iOS/Program.cs:line 13
+
+=================================================================
+	Native Crash Reporting
+=================================================================
+Got a SIGABRT while executing native code. This usually indicates
+a fatal error in the mono runtime or one of the native libraries 
+used by your application.
+=================================================================
+
+=================================================================
+	Native stacktrace:
+=================================================================
+	0x10da377c4 - /Users/<REDACTED>/Library/Developer/CoreSimulator/Devices/793D098A-2540-4F27-9CF8-83AD59BAB8E2/data/Containers/Bundle/Application/6C251FDB-A24B-45AE-AF4F-97BA5C5F911B/tabbedpage-bugreport.app/libmonosgen-2.0.dylib : mono_dump_native_crash_info
+	0x10d9dbade - /Users/<REDACTED>/Library/Developer/CoreSimulator/Devices/793D098A-2540-4F27-9CF8-83AD59BAB8E2/data/Containers/Bundle/Application/6C251FDB-A24B-45AE-AF4F-97BA5C5F911B/tabbedpage-bugreport.app/libmonosgen-2.0.dylib : mono_handle_native_crash
+	0x10dbe5e68 - /Users/<REDACTED>/Library/Developer/CoreSimulator/Devices/793D098A-2540-4F27-9CF8-83AD59BAB8E2/data/Containers/Bundle/Application/6C251FDB-A24B-45AE-AF4F-97BA5C5F911B/tabbedpage-bugreport.app/libmonosgen-2.0.dylib : sigabrt_signal_handler.cold.1
+	0x10da370f8 - /Users/<REDACTED>/Library/Developer/CoreSimulator/Devices/793D098A-2540-4F27-9CF8-83AD59BAB8E2/data/Containers/Bundle/Application/6C251FDB-A24B-45AE-AF4F-97BA5C5F911B/tabbedpage-bugreport.app/libmonosgen-2.0.dylib : sigabrt_signal_handler
+	0x12173fc1d - /usr/lib/system/libsystem_platform.dylib : _sigtramp
+	0x0 - Unknown
+	0x1216bbe58 - /Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Library/Developer/CoreSimulator/Profiles/Runtimes/iOS.simruntime/Contents/Resources/RuntimeRoot/usr/lib/system/libsystem_c.dylib : abort
+	0x10d26d597 - /Users/<REDACTED>/Library/Developer/CoreSimulator/Devices/793D098A-2540-4F27-9CF8-83AD59BAB8E2/data/Containers/Bundle/Application/6C251FDB-A24B-45AE-AF4F-97BA5C5F911B/tabbedpage-bugreport.app/libxamarin-dotnet-debug.dylib : xamarin_unhandled_exception_handler
+	0x10d816705 - /Users/<REDACTED>/Library/Developer/CoreSimulator/Devices/793D098A-2540-4F27-9CF8-83AD59BAB8E2/data/Containers/Bundle/Application/6C251FDB-A24B-45AE-AF4F-97BA5C5F911B/tabbedpage-bugreport.app/libmonosgen-2.0.dylib : mono_invoke_unhandled_exception_hook
+	0x10d9db6e5 - /Users/<REDACTED>/Library/Developer/CoreSimulator/Devices/793D098A-2540-4F27-9CF8-83AD59BAB8E2/data/Containers/Bundle/Application/6C251FDB-A24B-45AE-AF4F-97BA5C5F911B/tabbedpage-bugreport.app/libmonosgen-2.0.dylib : mono_handle_exception_internal
+	0x10d9d96f5 - /Users/<REDACTED>/Library/Developer/CoreSimulator/Devices/793D098A-2540-4F27-9CF8-83AD59BAB8E2/data/Containers/Bundle/Application/6C251FDB-A24B-45AE-AF4F-97BA5C5F911B/tabbedpage-bugreport.app/libmonosgen-2.0.dylib : mono_handle_exception
+	0x10da48669 - /Users/<REDACTED>/Library/Developer/CoreSimulator/Devices/793D098A-2540-4F27-9CF8-83AD59BAB8E2/data/Containers/Bundle/Application/6C251FDB-A24B-45AE-AF4F-97BA5C5F911B/tabbedpage-bugreport.app/libmonosgen-2.0.dylib : interp_throw
+	0x10da4161c - /Users/<REDACTED>/Library/Developer/CoreSimulator/Devices/793D098A-2540-4F27-9CF8-83AD59BAB8E2/data/Containers/Bundle/Application/6C251FDB-A24B-45AE-AF4F-97BA5C5F911B/tabbedpage-bugreport.app/libmonosgen-2.0.dylib : interp_exec_method
+	0x10da38e53 - /Users/<REDACTED>/Library/Developer/CoreSimulator/Devices/793D098A-2540-4F27-9CF8-83AD59BAB8E2/data/Containers/Bundle/Application/6C251FDB-A24B-45AE-AF4F-97BA5C5F911B/tabbedpage-bugreport.app/libmonosgen-2.0.dylib : interp_runtime_invoke
+	0x10d85dde8 - /Users/<REDACTED>/Library/Developer/CoreSimulator/Devices/793D098A-2540-4F27-9CF8-83AD59BAB8E2/data/Containers/Bundle/Application/6C251FDB-A24B-45AE-AF4F-97BA5C5F911B/tabbedpage-bugreport.app/libmonosgen-2.0.dylib : mono_runtime_invoke_checked
+	0x10d865dfc - /Users/<REDACTED>/Library/Developer/CoreSimulator/Devices/793D098A-2540-4F27-9CF8-83AD59BAB8E2/data/Containers/Bundle/Application/6C251FDB-A24B-45AE-AF4F-97BA5C5F911B/tabbedpage-bugreport.app/libmonosgen-2.0.dylib : do_exec_main_checked
+	0x10d994e42 - /Users/<REDACTED>/Library/Developer/CoreSimulator/Devices/793D098A-2540-4F27-9CF8-83AD59BAB8E2/data/Containers/Bundle/Application/6C251FDB-A24B-45AE-AF4F-97BA5C5F911B/tabbedpage-bugreport.app/libmonosgen-2.0.dylib : mono_jit_exec
+	0x10d280e77 - /Users/<REDACTED>/Library/Developer/CoreSimulator/Devices/793D098A-2540-4F27-9CF8-83AD59BAB8E2/data/Containers/Bundle/Application/6C251FDB-A24B-45AE-AF4F-97BA5C5F911B/tabbedpage-bugreport.app/libxamarin-dotnet-debug.dylib : xamarin_main
+	0x104300e24 - /Users/<REDACTED>/Library/Developer/CoreSimulator/Devices/793D098A-2540-4F27-9CF8-83AD59BAB8E2/data/Containers/Bundle/Application/6C251FDB-A24B-45AE-AF4F-97BA5C5F911B/tabbedpage-bugreport.app/tabbedpage-bugreport : main
+	0x10ce51384 - Unknown
+	0x20496d310 - Unknown
+
+=================================================================
+	Basic Fault Address Reporting
+=================================================================
+Memory around native instruction pointer (0x121e1330e):0x121e132fe  ff ff c3 90 90 90 b8 48 01 00 02 49 89 ca 0f 05  .......H...I....
+0x121e1330e  73 08 48 89 c7 e9 aa 9a ff ff c3 90 90 90 b8 53  s.H............S
+0x121e1331e  00 00 02 49 89 ca 0f 05 73 08 48 89 c7 e9 92 9a  ...I....s.H.....
+0x121e1332e  ff ff c3 90 90 90 b8 83 01 00 02 49 89 ca 0f 05  ...........I....
+
+=================================================================
+	Managed Stacktrace:
+=================================================================
+=================================================================
+
